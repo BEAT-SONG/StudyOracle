@@ -1,0 +1,141 @@
+-- 행단위로 조회하는 셀렉션/내가 원하는 정보만 찾아서 보겠다라는 의미이다. 
+SELECT*FROM emp
+WHERE  sal = 5000;
+
+--열단위로 조회하는 셀렉션
+SELECT*FROM emp
+WHERE job ='CLERK';
+
+-- null은 0이라 같은 값이 아니다.
+SELECT*FROM emp
+WHERE comm = 0;
+
+-- OR은 둘 중 하나만 있어도 나오는 것이다. NULL은 =을 쓰지 않는다. IS로 표현해야한다.
+SELECT*FROM emp
+WHERE comm = 0 OR comm IS NULL;
+
+-- comm이 0이면서 NULL 인 경우는 없다. 
+SELECT*FROM emp
+WHERE comm = 0 AND comm IS NULL;
+
+-- comm(보너스)가 없고 직업이 ANALYST인 직업을 셀렉션/ 데이터에 대소문자의 구분이 있다.
+SELECT*FROM emp
+WHERE comm IS NULL AND job = 'ANALYST';
+
+--프로젝션: 원하는 데이터만 보겠다.
+SELECT empno, ename, deptno
+FROM emp
+WHERE deptno = '30';
+
+ -- 조인, 2개 이상의 데이터를 하나의 테이블처럼 조회하는 방법 / B 테이블을 기본키를 가져와서 쓰는 A 테이블이 있다. 이것을 A의 외래키라고 한다. 
+ -- 이 두 값을 맞춰주어야한다. / 이 두 값은 같을 수 밖에 없다. / = 를 주로 사용해서 표현한다.
+ -- 부서번호에 따른 부서명을 한번에 볼 수 있게 2개의 테이블을 합쳐서 볼 수 있다. / 이거는 실제하는 테이블이 아닌 가상의 테이블(버츄얼테이블) / 프로그램 상에만 존재한다.
+ -- 테이블명이 너무 긴경우, 별칭을 사용할 수 있다.
+ SELECT*FROM emp
+ JOIN dept
+ ON emp.deptno = dept.deptno;
+ 
+SELECT*FROM emp e
+ JOIN dept d
+ ON e.deptno = d.deptno;
+ 
+ SELECT e. empno, e. ename, e. job, d. deptno
+ FROM emp e
+ JOIN dept d
+ ON e.deptno = d.deptno;
+ 
+ -- DISTINCT 복습 / 컴퓨터를 쓰는 이유는 효율을 위해서 이다. / 수동으로 찾아서 하는 것은 거의 없다. / 모든 것을 프로그램으로 만들어서 하는 듯
+ SELECT DISTINCT job FROM emp;
+ 
+ -- 별칭 ALAS
+ SELECT ename, job, sal, sal+sal+sal+sal+sal+sal+sal+sal+sal+sal+sal+sal
+ FROM emp;
+ 
+ --NULL의 문제 
+SELECT ename, job, sal, sal*12+comm
+ FROM emp;
+ 
+-- 다양한 연산기호를 사용할 수 있다. / 데이터의 이름 바꾸기 AS 명령어.(기준이다. 빼고 적어도 되기는 한데 표준은 AS를 넣는 것이다,)
+SELECT ename, job, sal, sal*12 AS annual
+ FROM emp;
+ 
+ -- 위의 명렁어와 같은 결과를 얻을 수 있다.
+ -- ASC(오름차순): 오름차순으로 순서를 나타내 주는 명령어.
+SELECT ename, job, sal, sal*12 annual
+ FROM emp
+ ORDER BY sal ASC;
+ 
+ -- DESC(내림차순): 내림차순으로 순서를 나타내 주는 명령어.
+ -- 숫자 데이터가 여러개일 경우에는 위의 두 명령어를 다양하게 사용 가능하다.
+SELECT ename, job, sal, sal*12 annual
+ FROM emp
+ ORDER BY sal DESC;
+
+-- 다양한 연산자 활용하기
+-- WHERE 절
+-- 한줄에서도 별칭을 뒤에서 사용할 수 없다. / 에러 발생
+SELECT ename, job, sal, sal*12 annual
+ FROM emp
+WHERE annual>= 10000;
+
+SELECT ename, job, sal, sal*12 annual
+ FROM emp
+WHERE sal*12>= 10000;
+
+SELECT ename, job, sal, sal*12 annual
+ FROM emp
+WHERE sal = 1000;
+
+SELECT ename, job, sal, sal*12 annual
+ FROM emp
+WHERE sal <> 1000; -- !=, <> 가 많이 사용된다. ^=는 거의 사용되지 않는다.
+
+-- NOT 절.  내용전체를 부정하는 연산자임으로 이므로 내용의 앞에 둬야한다. 
+SELECT ename, job, sal, sal*12 annual
+ FROM emp
+WHERE NOT sal = 1000;
+
+--IN 절. 빈도가 20정도 이다. 통계낼때 사용. 그러나 전체적인 데이터를 다루는 곳에서는 주로 사용되지 않는다.
+-- 숫자 사이나 띄어적을 때는 , (콤나) 사용 주의
+SELECT ename, job, sal, sal*12 annual
+ FROM emp
+WHERE sal IN (800, 1600, 5000); 
+
+-- OR절도 가능 그러나 효율적이게 사용하기 위해서 IN절을 사용하는 것이 좋다. 
+-- 절이 길어지면 결과가 도출되는 시간이 늘어남으로 효율성이 떨어진다. 
+SELECT ename, job, sal, sal*12 annual
+ FROM emp
+WHERE sal = 800 OR sal = 1600 OR sal = 5000; 
+
+-- BETWEEN A AND B
+-- 커리를 줄이기 위해서 사용한다.
+SELECT ename, job, sal, sal*12 annual
+ FROM emp
+ WHERE sal >= 1600 AND sal <=2975;
+ 
+ SELECT ename, job, sal, sal*12 annual
+ FROM emp
+  WHERE sal BETWEEN 1600 AND 2975; 
+  
+ -- LIKE 문
+ -- ~와 같은. 조건을 검색할 때 사용한다.
+ -- %가 글자나 숫자가 포함된 것을 검색할 때 주로 사용하는 것이다.
+ -- %를 어딕에 붙이느랴에 따라서 검색되는 결과가 다르게 나온다.
+ -- O%, %O, %O%, __RD
+ SELECT ename, job, sal, sal*12 annual
+ FROM emp 
+WHERE ename = 'JONES';
+
+ SELECT ename, job, sal, sal*12 annual
+ FROM emp 
+WHERE ename LIKE 'J%';
+
+-- 특정한 글자 수를 지정할 수 있는 것. 
+-- __RD: 4글자이면서 RD로 끝나는 데이터를 검색할 때 사용할 수 있다. 
+ SELECT ename, job, sal, sal*12 annual
+ FROM emp 
+ WHERE ename LIKE '__RD'; 
+
+
+
+
