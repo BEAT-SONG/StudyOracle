@@ -135,6 +135,150 @@ WHERE ename LIKE 'J%';
  SELECT ename, job, sal, sal*12 annual
  FROM emp 
  WHERE ename LIKE '__RD'; 
+ 
+ SELECT ROUND(15 193.1) FROM dual; --?
+ 
+ -- SYSDATE: 현재 날짜와 시간을 출력해준다.
+ -- 외국식으로 출력이 나타난다.
+ SELECT SYSDATE FROM dual;
+
+-- 자료형을 변형시키는 우가 왕왕 많다.
+-- 자료형을 반환하는 '형 변환 함수'
+ --TO_CHAR(sal): sal이 내부적으로 문자로 바뀐 것
+ -- dual: 가상테이블. 없는 테이블에서 숫자를 가져오는데 쓰이는 공통? 기본적인 테이블.
+SELECT ename, hiredate, TO_CHAR(sal) FROM emp;
+SELECT ename, hiredate, sal+1000 FROM emp;
+SELECT ename, hiredate, TO_CHAR(sal) + 1000 FROM emp;
+SELECT ename, hiredate, TO_CHAR(sal) + '1000' FROM emp;
+SELECT ename, hiredate, TO_CHAR(hiredate, 'yyyy-mm-dd'), TO_CHAR(sal) FROM emp;-- 언니 짱!
+
+SELECT ename, TO_CHAR(hiredate, 'yyyy-mm-dd') FROM emp;
+
+-- TO_NUMBER
+SELECT TO_NUMBER('2400') + 100 FROM dual;
+
+-- 글자를 숫자로 바꿀 수 없다. 숫자인 글자를 숫자로 바꿀 수 있다.
+SELECT TO_NUMBER('이천사백') + 100 FROM dual;
+
+-- TO_DATE
+SELECT TO_DATE('2022-01-12') FROM dual;
+
+SELECT TO_DATE('01/11/22') FROM dual;
+
+SELECT TO_DATE('01/11/22', 'mm/dd/yy') FROM dual; -- 국가마다 날짜를 나타내는 순서가 다를 수 있다. 이것을 원하는 나라에 맞춰서 조절할 수 있는 방법이다.
+
+-- NVL: NULL을 취급하는 방법 중 하나. 
+-- 숫자로 들어간 NULL은 다른 숫자와 연산이 불가능하여 NULL을 숫자로 바꿔주는 함수가 NVL 이다.
+SELECT ename, job, sal, sal*12 annual, NVL(comm, 0) comm
+ FROM emp
+ ORDER BY sal ASC;
+
+SELECT ename, job, sal, (sal*12) + NVL(comm, 0) AS annual
+ FROM emp
+ ORDER BY sal ASC;
+ 
+ SELECT ename, job, sal,  NVL(comm, 0) comm, (sal*12) + NVL(comm, 0) AS annual
+ FROM emp
+ ORDER BY sal ASC;
+ 
+-- 집계함수: SUM, COUNT, MIN, MAX, AVG
+SELECT sal, NVL(comm, 0)  FROM emp;
+
+SELECT SUM(sal) Totalsalary  FROM emp;
+
+SELECT SUM(NVL(comm,0)) Totalcommssion  FROM emp;
+SELECT SUM(comm) Totalcommssion  FROM emp;
+
+SELECT MAX(sal) from  emp;
+
+SELECT MIN(sal) from  emp;
+
+SELECT AVG(sal) FROM emp;
+SELECT ROUND(AVG(sal),0) sal_avg FROM emp; -- ROUND 를 이용하여 소수점 아래 자리 숫자를 조절할 수 있다.
+SELECT ROUND(AVG(sal),1) sal_avg FROM emp; -- ROUND(숫자데이터, 소수점자리수)
+
+
+SELECT MAX(sal), ename from  emp; -- 이런 경우를 위해 GROUP BY 함수를 사용한다.
+
+-- GROUP BY 
+SELECT MAX(sal), ename 
+from  emp
+GROUP BY ename; -- MAX가 안 나오고 다 나온다. ename(이름)은 다 다르기 때문에 그룹화 중 MAX가 나타나지 않고 모드 그 그룹에서 최대임으로 다 나온다.
+
+SELECT MAX(sal), job 
+from  emp
+GROUP BY job; -- job에서 가장 MAX인 값들만 집계된다.
+
+SELECT MAX(sal)월급최대 , SUM(sal) 직업군당급여합계, job 
+from  emp
+GROUP BY job;
+
+-- 집계함수를 제외하고 셀렉션할 테이블 수와 그룹바이 테이블 수와 같아야 한다.
+-- 집계함수는 함수를 사용해서 결과값을 도출해낸 것이다.
+-- 어렵다 더 생각해보자.
+-- GROUP BY는 그룹화할 열을 지정.(여러개 지정 가능)
+SELECT MAX(sal)월급최대 , SUM(sal) 직업군당급여합계, job, deptno 
+from  emp
+GROUP BY job, deptno ;
+
+SELECT MAX(sal)월급최대 , SUM(sal) 직업군당급여합계
+from  emp;
+
+SELECT MAX(sal)월급최대 , SUM(sal) 직업군당급여합계, job 
+from  emp
+GROUP BY job ;
+
+-- HAVING
+-- 그룹화된 값들을 한번 걸러주는 기능.
+
+SELECT MAX(sal)월급최대 , SUM(sal) 직업군당급여합계, job -- 별칭은 하나의 실행 라인에서만 사용이 가능
+from  emp
+GROUP BY job 
+HAVING MAX(sal) > 4000;
+
+SELECT MAX(sal)월급최대 , SUM(sal) 직업군당급여합계, job 
+from  emp
+WHERE MAX(sal) > 4000 -- 집계함수(그룹화)한 함수는 WHERE절에 쓸 수 없다. 이때는 HAVING 을 사용해야한다. 위의 함수.
+GROUP BY job ;
+
+-- 기본 함수
+SELECT deptno, job, sal
+FROM emp
+ORDER BY deptno, job; -- 오름차순이 기본이기때문에 작성하기 않아도 된다. 
+
+-- 평균 급여가 3000달러 이상인 직종만 나타내자.
+SELECT deptno, job,  AVG(sal)
+FROM emp
+GROUP BY deptno, job
+HAVING AVG(sal) >= 3000
+ORDER BY deptno, job;-- 모조건 마지막 순서이다. 
+
+-- 원하는 집계 내용을 추가하면 원하는 결과값을 테이블로 나타낼 수 있다.
+SELECT deptno, job,  AVG(sal), MAX(sal), COUNT(*) 
+FROM emp
+GROUP BY deptno, job
+HAVING AVG(sal) >= 1000
+ORDER BY deptno, job;
+
+-- ROLLUP: GROUP BY 뒤에서 사용한다.
+-- GROUP BY ROLLUP()
+-- 그룹화된 데이터의 합계
+-- 여기서 나오는 NULL은 우리가 처리해 줘야한다.
+SELECT NVL(deptno, 00)deptno, NVL(job, '합계')job,  ROUND(AVG(sal), 0) 급여평균, MAX(sal) 급여최대, SUM(sal) 급여합계, COUNT(*) 그룹별직원수 
+FROM emp
+GROUP BY ROLLUP (deptno, job);
+-- HAVING AVG(sal) >= 1000
+-- ORDER BY deptno, job;
+
+SELECT deptno, NVL(job, '합계')job,  ROUND(AVG(sal), 0) 급여평균, MAX(sal) 급여최대, SUM(sal) 급여합계, COUNT(*) 그룹별직원수 
+FROM emp
+GROUP BY ROLLUP (deptno, job);
+
+
+
+
+
+
 
 
 
