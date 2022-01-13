@@ -14,3 +14,10 @@ Oracle 학습 리포지토리
 - IN 절
 - BETWEEN A AND B
 - LIKE 문
+
+### 3일차 학습
+- 조인(INNER JOIN, LEFT/RIGHT OUTER JOIN)
+- 서브쿼리
+- DML(INSERT, UPDATE, DELETE 문)
+- SEQUENCE(스퀸스)
+- 트랜잭션(COMMIT, ROLLBACK)
